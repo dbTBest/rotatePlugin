@@ -1,0 +1,136 @@
+<!doctype html>
+<html>
+<head>
+<style type="text/css">
+    html,body{
+        margin:0px;
+    }
+    ul{
+        list-style: none;
+        padding-left: 0px;
+    }
+    #reward{
+/*        position: fixed;*/
+        width:30vh;
+        height: 30vh;
+        margin: auto;
+        margin-top: 40vh;
+        font-size: 0px;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        perspective-origin: 35% 0%;
+/*        transform: rotateX(0deg);*/
+        position: relative;
+    }
+    #reward li{
+        display: inline-block;
+        width:25%;
+        line-height: 5em;
+        opacity: 0.5;
+        font-size: 16px;
+        text-align: center;
+        transition: all 1s ease-in-out;
+        position: absolute;
+        left:50%;
+    }
+     #reward li:nth-child(1){
+        background-color: #161;
+    }
+     #reward li:nth-child(2){
+        background-color: #452;
+    }
+    #reward li:nth-child(3){
+        background-color: #313;
+    }
+    #reward li:nth-child(4){
+        background-color: #894;
+    }
+    #reward li:nth-child(5){
+        background-color: #015;
+    }
+    #reward li:nth-child(6){
+        background-color: #990;
+    }
+    @media all and (max-width:768px){
+        
+    }
+</style>
+</head>
+    <body>
+       <ul id="reward">
+           <li id="R" class="rewardText">R</li>
+           <li id="e" class="rewardText">e</li>
+            <li id="w" class="rewardText">w</li>
+           <li id="a" class="rewardText">a</li>
+           <li id="r" class="rewardText">r</li>
+           <li id="d" class="rewardText">d</li>
+        </ul>
+        <script>
+            var rewardText=document.getElementsByClassName("rewardText");
+            var rewardTransformContext=(function(o){
+                var translateZ;
+                var degOffset=60;
+                
+                if(!translateZ){
+                (function(){
+                    translateZ=o.offsetWidth/2*(Math.sqrt(3).toFixed(2))+50;
+                }());
+            }
+                
+                var transformStore=[];
+                 var i=1;
+                var getIndex=function(k){
+                    var index=(k+1+i)%6-1;
+                    if(index<0){
+                       index=transformStore.length-1;
+                       }
+                    console.log(k);
+                    console.log(i);
+                    console.log(index);
+                    console.log("\n\n\n\n");
+                    if(k==5){
+                       i+=1;
+                       }
+                    return index;
+                }
+                
+                return {
+                    rotateReward:function(){
+                
+                Array.prototype.forEach.call(rewardText,function(v,k){
+//                console.log(Object.prototype.toString.call(k));
+                v.style.transform=rewardTransformContext.getTransformData(getIndex(k));
+            });
+                },
+                
+                getTransformData:function(i){ 
+//                switch(i){
+//                    case 0:
+//                        transformStore[0]="translateZ("+translateZ+"px)";
+//                        return transformStore[0];
+//                    case 1:return "rotateY(60deg) "+"translateZ("+translateZ+"px)";
+//                    case 2:return "rotateY(120deg) "+"translateZ("+translateZ+"px)";
+//                    case 3:return "rotateY(180deg) "+"translateZ("+translateZ+"px)";  
+//                    case 4:return "rotateY(240deg) "+"translateZ("+translateZ+"px)";
+//                    case 5:return "rotateY(300deg) "+"translateZ("+translateZ+"px)";
+//                       }
+                    if(transformStore.length<6){
+                        if(i==0){
+                           transformStore[i]="translateZ("+translateZ+"px)";
+                           }else{
+                       transformStore[i]="rotateY("+i*degOffset+"deg) "+"translateZ("+translateZ+"px)";
+                           }
+                       }
+                    return transformStore[i];
+                }
+                }
+            }(rewardText[0]));
+            Array.prototype.forEach.call(rewardText,function(v,k){
+//                console.log(Object.prototype.toString.call(k));
+                v.style.transform=rewardTransformContext.getTransformData(k);
+            });
+            
+            window.setInterval(rewardTransformContext.rotateReward,3000);
+        </script>
+    </body>
+</html>
