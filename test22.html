@@ -1,0 +1,219 @@
+<!doctype html>
+<html>
+<head>
+<style type="text/css">
+    html,body{
+        margin:0px;
+    }
+    ul{
+        list-style: none;
+        padding-left: 0px;
+    }
+    #reward{
+/*        position: fixed;*/
+        width:30vh;
+        height: 30vh;
+        margin: auto;
+        margin-top: 40vh;
+        font-size: 0px;
+        transform-style: preserve-3d;
+        perspective: 1000px;
+        perspective-origin: 35% 0%;
+/*        transform: rotateX(0deg);*/
+        position: relative;
+/*        transition: all 0.05s linear;*/
+    }
+    #reward li{
+        display: inline-block;
+        width:15%;
+        line-height: 5em;
+        opacity: 0.5;
+        font-size: 16px;
+        text-align: center;
+        transition: all 0.2s linear;
+        position: absolute;
+        left:50%;
+    }
+     #reward li:nth-child(1){
+        background-color: #161;
+    }
+     #reward li:nth-child(2){
+        background-color: #452;
+    }
+    #reward li:nth-child(3){
+        background-color: #313;
+    }
+    #reward li:nth-child(4){
+        background-color: #894;
+    }
+    #reward li:nth-child(5){
+        background-color: #015;
+    }
+    #reward li:nth-child(6){
+        background-color: #990;
+    }
+    @media all and (max-width:768px){
+        
+    }
+</style>
+</head>
+    <body>
+       <ul id="reward">
+           <li id="R" class="rewardText">R</li>
+           <li id="e" class="rewardText">e</li>
+            <li id="w" class="rewardText">w</li>
+           <li id="a" class="rewardText">a</li>
+           <li id="r" class="rewardText">r</li>
+           <li id="d" class="rewardText">d</li>
+        </ul>
+        <script>
+            var rewardText=document.getElementsByClassName("rewardText");
+            var rewardBox=document.getElementById("reward");
+            var desFlag=false;
+            var properPositionFlag=false;
+            var rewardTransformContext=(function(o){
+                var translateZ;
+                var degOffset=60;
+                var rewardTextReverse=Array.prototype.reverse.call(rewardText);
+                
+                if(!translateZ){
+                (function(){
+                    translateZ=o.offsetWidth/2*(Math.sqrt(3).toFixed(2))+15;
+                }());
+            }
+                
+                var transformStore=[];
+                 var i=1;
+                var getIndex=function(k){
+                    var index=(k+1+i)%6-1;
+                    if(index<0){
+                       index=transformStore.length-1;
+                       }
+//                    console.log(k);
+//                    console.log(i);
+//                    console.log(index);
+//                    console.log("\n\n\n\n");
+                    if(k==5){
+                       i+=1;
+                       }
+                    return index;
+                }
+                
+                return {
+                    rotateReward:function(){
+                
+                Array.prototype.forEach.call(rewardTextReverse,function(v,k){
+//                console.log(Object.prototype.toString.call(k));
+                    console.log("dw");
+                v.style.transform=rewardTransformContext.getTransformData(getIndex(k));
+                if(k==5){
+                    properPositionFlag=true;
+                   }
+            });
+                if(desFlag){
+                    if(properPositionFlag){
+                            window.clearInterval(rewardControlor);
+                            Array.prototype.forEach.call(rewardText,function(v,k){
+                            v.style.position="static";
+                            v.style.transform="";
+            });
+                       }
+                   }
+                },
+                
+                getTransformData:function(i){ 
+//                switch(i){
+//                    case 0:
+//                        transformStore[0]="translateZ("+translateZ+"px)";
+//                        return transformStore[0];
+//                    case 1:return "rotateY(60deg) "+"translateZ("+translateZ+"px)";
+//                    case 2:return "rotateY(120deg) "+"translateZ("+translateZ+"px)";
+//                    case 3:return "rotateY(180deg) "+"translateZ("+translateZ+"px)";  
+//                    case 4:return "rotateY(240deg) "+"translateZ("+translateZ+"px)";
+//                    case 5:return "rotateY(300deg) "+"translateZ("+translateZ+"px)";
+//                       }
+                    if(transformStore.length<6){
+                        if(i==0){
+                           transformStore[i]="translateZ("+translateZ+"px)";
+                           }else{
+                       transformStore[i]="rotateY("+i*degOffset+"deg) "+"translateZ("+translateZ+"px)";
+                           }
+                       }
+                    return transformStore[i];
+                }
+                }
+            }(rewardText[0]));
+            Array.prototype.forEach.call(rewardText,function(v,k){
+                v.style.transform=rewardTransformContext.getTransformData(k);
+            });
+            
+            var rewardControlor=window.setInterval(rewardTransformContext.rotateReward,200);
+            
+            
+            var curveAction=(function(sx,sy){
+                if(sy%2!=0){
+                        sy+=1;
+                    }
+                var i=0;
+                var curY=sy;
+                var curX=sx;
+                var timeoffset=50;
+                var p=Math.pow(sy,2)/(2*sx);
+                var evenLenoffset=10;
+                
+                function check(){
+                    if(++i<=count){
+//                            console.log("i"+i);
+                            return true;
+                       }else{
+                           return false;
+                       }
+                }
+                
+                function compute(){
+                    curY=curY-evenLenoffset;
+                    curX=Math.pow(curY,2)/(2*p);
+//                    console.log("y:"+curY);
+//                    console.log("x:"+curX);
+                }
+                
+                
+                
+                function action(){
+                    if(check()){
+                        compute();
+                        reward.style.left=curX+"px";
+                        reward.style.top=curY+"px";
+                        window.setTimeout(arguments.callee,timeoffset);
+                       }else{
+                           desFlag=true;
+                       }
+                }
+                
+                return function(dy){
+                    reward.style.left=curX+"px";
+                    reward.style.top=curY+"px";
+                    reward.style.marginTop="0px";
+                    reward.style.marginLeft="0px";
+                    reward.style.marginBottom="0px";
+                    reward.style.marginRight="0px";
+                    reward.style.position="fixed";
+//                    reward.style.transition="all 0.05s linear";
+                    if(dy%2!=0){
+                        dy+=1;
+                    }
+                    count=(sy-dy)/evenLenoffset+1;
+//                    console.log("count:"+count);
+                    
+                    window.setTimeout(function(){
+                        reward.style.transition="all 0.051s linear";
+                        action();
+                    },1000);
+                }
+            }(reward.offsetLeft,reward.offsetTop));
+            window.setTimeout(function(){
+                curveAction(20);
+            },1000);
+        </script>
+    </body>
+</html>
