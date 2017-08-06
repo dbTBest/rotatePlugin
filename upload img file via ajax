@@ -1,0 +1,198 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>无标题文档</title>
+<script src="jquery-3.2.1.js"></script>
+<style type="text/css">
+	#board{
+		position: fixed;
+		transition: all 0.2s 0.5s ease-in-out;
+	}
+	#image-submit{
+		width:70px;
+		height:30px;
+		line-height: 30px;
+		font-size: 12px;
+		border: 1px solid #534A4B;
+		border-radius:5px;
+		text-align: center;
+		letter-spacing: 1em;
+		text-indent: .5em;
+	}
+	#image-submit:hover{
+		cursor: pointer;
+		background-color: #ccc;
+	}
+/*	#image-choose-input{
+		display: none;
+	}
+
+	#image-choose-button{
+		
+	}
+*/
+</style>
+</head>
+
+<body>
+<div id="image-submit">上传</div>
+<input id="image-choose-input" type="file"/>
+<script>
+	$("#image-submit").bind("click",function(){
+		var xhr=null;
+		if(window.XMLHttpRequest){
+			xhr=new XMLHttpRequest();
+		}else{
+			xhr=new ActiveXObject("Microsoft.XMLHTTP");
+		}
+		xhr.onreadystatechange=function(){
+			if(this.readyState==4&&this.status==200){
+				alert("成功上传");
+			}
+		}
+		xhr.open("POST","/Test4/servletControlor",true);
+		xhr.setRequestHeader("Content-Type","multipart/form-data");
+		xhr.setRequestHeader("suffixName",document.getElementById("image-choose-input").files[0].type.split("/")[1]);
+		xhr.send(canvasUtilAction(document.getElementById("board")).toDataURL().split(",")[1]);
+	});
+	$("#image-choose-input").bind("change",function(){
+		var reader=new FileReader();
+		reader.onload=function(){
+			if(this.readyState==2){
+				imagePreview(this.result,);
+			}
+		}
+		reader.readAsDataURL(this.files[0]);
+	});
+	function imagePreview(url){
+	var board=document.createElement("img");
+		board.id="board";
+		board.crossorigin="anonymous";
+		$("body").append(board);
+	board.coords={
+		x:[],
+		y:[],
+		xMax:0,
+		xMin:0,
+		yMax:0,
+		yMin:0,
+		coords:{
+			x:0,
+			y:0
+		},
+		r:0,
+		imgSourceLeft:0,
+		imgSourceTop:0,
+		imgSourceWidth:0,
+		imgSourceHeight:0
+	};
+	$("#board").bind("load",function(e){
+		var width=this.naturalWidth;
+		var height=this.naturalHeight;
+		if(width>height){
+			$(this).css({
+				"width":"100%",
+				"height":window.innerWidth*height/width+"px",
+				"left":"0px",
+				"top":(window.innerHeight-window.innerWidth*height/width)/2+"px"
+			});
+			this.percent=window.innerWidth*height/width/height;
+		}else{
+			$(this).css({
+				"height":window.innerWidth*height*0.7+"px",
+				"width":window.innerWidth*height*0.7*width/height+"px",
+				"left":(window.innerWidth-window.innerWidth*height*0.7*width/height)/2+"px",
+				"top":window.innerWidth*height*0.15+"px"
+			});
+			this.percent=window.innerWidth*height*0.7/height;
+		}
+	});
+	$("#board").bind("touchstart",function(){
+		this.coords.x=[];this.coords.y=[];
+	});
+	$("#board").bind("touchmove",function(e){
+		this.coords.x.push(e.touches[0].clientX);
+		this.coords.y.push(e.touches[0].clientY);
+	});
+	$("#board").bind("touchend",function(){
+		this.xMax=this.coords.x.reduce(function(max,xv){
+			return max>xv?max:xv;
+		});
+		this.xMin=this.coords.x.reduce(function(min,xv){
+			return min<xv?min:xv;
+		});
+		this.yMax=this.coords.y.reduce(function(max,yv){
+			return max>yv?max:yv;
+		});
+		this.yMin=this.coords.y.reduce(function(min,yv){
+			return min<yv?min:yv;
+		});
+		var xMax=this.xMax;
+		var xMin=this.xMin;
+		var yMax=this.yMax;
+		var yMin=this.yMin;
+		if((xMax-xMin)>(yMax-yMin)){
+			this.coords.r=(xMax-xMin)/2;
+		}else{
+			this.coords.r=(yMax-yMin)/2;
+		}
+		this.coords.coords.x=(xMax-xMin)/2+xMin;
+		this.coords.coords.y=(yMax-yMin)/2+yMin;
+		this.imgSourceLeft=this.coords.coords.x-this.coords.r-this.offsetLeft;
+		this.imgSourceTop=this.coords.coords.y-this.coords.r-this.offsetTop;
+		this.imgSourceWidth=this.coords.r*2;
+		this.imgSourceHeight=this.coords.r*2;
+		this.canvasWidth=this.imgSourceWidth;
+		this.canvasHeight=this.imgSourceHeight;
+		this.canvasLeft=this.coords.coords.x-this.coords.r;
+		this.canvasTop=this.coords.coords.y-this.coords.r;
+		canvasPreviewAction.call(canvasUtilAction(this),this);
+		
+		$(this).css({
+			"transform":"scale(0.9,0.9)",
+			"opacity":0
+		});
+	});
+		board.src=url;
+	}
+	function canvasUtilAction(img){
+		var canvas=document.createElement("canvas");
+		$("body").append(canvas);
+		$(canvas).css({
+			"opacity":0,
+			"position":"fixed",
+			"z-index":-999
+		});
+		canvas.width=img.canvasWidth;
+		canvas.height=img.canvasHeight;
+		
+		var context=canvas.getContext("2d");
+		
+		var naturalImgSourceTop=img.imgSourceTop/img.percent;
+		var naturalImgSourceLeft=img.imgSourceLeft/img.percent;
+		var naturalImgSourceWidth=img.imgSourceWidth/img.percent;
+		var naturalImgSourceHeight=img.imgSourceHeight/img.percent;
+		
+		context.drawImage(img
+						 ,naturalImgSourceLeft,naturalImgSourceTop,naturalImgSourceWidth,naturalImgSourceHeight
+						 ,0,0,canvas.offsetWidth,canvas.offsetHeight
+						 );
+		
+		return canvas;
+	}
+	function canvasPreviewAction(img) {
+		this.id="imgCanvas";
+		$(this).css({
+			"border-radius":img.canvasWidth/2+"px",
+			"position":"fixed",
+			"opacity":1,
+			"top":img.canvasTop+"px",
+			"left":img.canvasLeft+"px",
+			"z-index":2
+		});
+	}
+</script>
+</body>
+</html>
